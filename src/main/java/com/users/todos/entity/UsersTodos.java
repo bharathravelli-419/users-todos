@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.List;
 
 @Document(collection = "users-todos")
@@ -19,5 +20,6 @@ public class UsersTodos {
     private String name;
     private List<String> openTodos;
     private List<String> completedTodos;
+//    private Date createdDate;
 
 }

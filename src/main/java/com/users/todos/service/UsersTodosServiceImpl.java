@@ -2,11 +2,13 @@ package com.users.todos.service;
 
 import com.users.todos.dao.UsersTodosRepository;
 import com.users.todos.entity.UsersTodos;
+import com.users.todos.exceptions.exceptionClasses.DuplicateTaskException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,20 +34,20 @@ public class UsersTodosServiceImpl {
         return usersTodosRepository.findAll();
     }
 
-    public boolean addNewTask(String userId, String newTask){
+    public boolean addNewTask(String userId, String newTask) throws DuplicateTaskException {
         Optional<UsersTodos> optionalUserTodos = usersTodosRepository.findById(userId);
-        UsersTodos existingUserTodos = optionalUserTodos.orElse(null);
 
-        assert existingUserTodos != null;
-        if(!existingUserTodos.getOpenTodos().contains(newTask) && !existingUserTodos.getCompletedTodos().contains(newTask)){
-           existingUserTodos.getOpenTodos().add(newTask);
-           usersTodosRepository.save(existingUserTodos);
-           return true;
-        }else{
-            log.error("Task with same content already exists in one of the Completed or Open Todos!. Please delete one to add");
-            return false;
-        }
+            UsersTodos existingUserTodos = optionalUserTodos.orElseThrow();
+            if(!existingUserTodos.getOpenTodos().contains(newTask) && !existingUserTodos.getCompletedTodos().contains(newTask)){
+                existingUserTodos.getOpenTodos().add(newTask);
+                usersTodosRepository.save(existingUserTodos);
+            }
+            else{
+                log.error("Trying to add duplicate task :{}",newTask);
+                throw new DuplicateTaskException("similar task already exists");
+            }
 
+        return true;
     }
 
     public boolean completedOneTask(String userId, String task){
